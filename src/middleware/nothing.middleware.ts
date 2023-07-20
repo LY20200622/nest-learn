@@ -10,5 +10,6 @@ export default function NothingMiddleware(
   next: NextFunction,
 ) {
   // do nothing
+  console.log('Logger[NothingMiddleware]');
   next();
 }
