@@ -5,6 +5,7 @@ import { PeopleModule } from './people/people.module';
 import LoggerMiddleware from './middleware/logger.middleware';
 import ClassCheckPipe from './pipe/classCheck.pipe';
 import { HttpExceptionFilter } from './exception/diyHttpExceptionFilter';
+import AuthGuard from './guard/auth.guard';
 
 @Module({
   imports: [PeopleModule],
@@ -12,14 +13,19 @@ import { HttpExceptionFilter } from './exception/diyHttpExceptionFilter';
   providers: [
     AppService,
     {
-      // 定义的全局 Pipe，从任何一个模块依赖注入即可
+      // 注册的全局 Pipe，提供依赖注入的功能，从任何一个模块注册即可
       provide: 'APP_PIPE',
       useClass: ClassCheckPipe,
     },
     {
-      // 定义的全局 Filter，从任何一个模块依赖注入即可
+      // 注册的全局 Filter，提供依赖注入的功能，从任何一个模块注册即可
       provide: 'APP_FILTER',
       useClass: HttpExceptionFilter,
+    },
+    {
+      // 注册的全局 Guard，提供依赖注入的功能，从任何一个模块注册即可
+      provide: 'APP_GUARD',
+      useClass: AuthGuard,
     },
   ],
   exports: [],

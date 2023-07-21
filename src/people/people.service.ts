@@ -47,4 +47,8 @@ export class PeopleService {
       );
     }
   }
+
+  getAdminData() {
+    return 'This is Admin Data';
+  }
 }

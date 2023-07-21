@@ -1,5 +1,6 @@
 import { NestFactory, HttpAdapterHost } from '@nestjs/core';
 import { AppModule } from './app.module';
+// import AuthGuard from './guard/auth.guard';
 // import ClassCheckPipe from './pipe/classCheck.pipe';
 // import NothingMiddleware from './middleware/nothing.middleware';
 // import { HttpExceptionFilter } from './exception/diyHttpExceptionFilter';
@@ -20,6 +21,9 @@ async function bootstrap() {
 
   // 使用全局验证 Pipe
   // app.useGlobalPipes(new ClassCheckPipe());
+
+  // 使用全局 Guard
+  // app.useGlobalGuards(new AuthGuard());
 
   await app.listen(3000);
 }
