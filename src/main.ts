@@ -1,5 +1,6 @@
 import { NestFactory, HttpAdapterHost } from '@nestjs/core';
 import { AppModule } from './app.module';
+// import LoggerInterceptor from './interceptor/logger.interceptor';
 // import AuthGuard from './guard/auth.guard';
 // import ClassCheckPipe from './pipe/classCheck.pipe';
 // import NothingMiddleware from './middleware/nothing.middleware';
@@ -24,6 +25,9 @@ async function bootstrap() {
 
   // 使用全局 Guard
   // app.useGlobalGuards(new AuthGuard());
+
+  // 使用全局 Interceptor
+  // app.useGlobalInterceptors(new LoggerInterceptor());
 
   await app.listen(3000);
 }

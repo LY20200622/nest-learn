@@ -73,7 +73,7 @@ export class AppController {
   }
 
   // 在方法参数层面使用 Pipe（转换）、在转换 Pipe 前使用默认值 Pipe
-  @Get(':id')
+  @Get('/checkNum/:id')
   getID(
     @Param('id', new DefaultValuePipe(0), ParseIntPipe, NothingPipe) id,
   ): string {
