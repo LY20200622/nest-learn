@@ -12,17 +12,15 @@ import AuthGuard from 'src/guard/auth.guard';
 import Role from 'src/decorator/role.decorator';
 import LoggerInterceptor from 'src/interceptor/logger.interceptor';
 
-@Controller('/people')
+@Controller('people')
 @UseGuards(AuthGuard)
 @UseInterceptors(LoggerInterceptor)
-export class PeopleController {
+export default class PeopleController {
   constructor(private readonly peopleService: PeopleService) {}
 
   @Get()
   getAllPeople(): string {
     const text = this.peopleService.getAllPeople();
-
-    console.log(text);
 
     return text;
   }
