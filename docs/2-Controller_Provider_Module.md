@@ -1,4 +1,4 @@
-# Nest 概念
+# Controller_Provider_Module
 
 ## 1 Controller
 
@@ -58,8 +58,8 @@ export default class PeopleController {
 - `@Param(key?: string)`。代表 req.params 或 req.params[key]。需要配合路由参数标记使用，形如：
 
   ```ts
-  @Get(':id')		// 路由参数标记
-  findOne(@Param('id') id) {		// 添加了路由参数标记的 handle 需要放在静态路径 handle 的后面
+  @Get(':id')  // 路由参数标记
+  findOne(@Param('id') id) {  // 添加了路由参数标记的 handle 需要放在静态路径 handle 的后面
     return id;
   }
 
@@ -206,7 +206,7 @@ export default class AnotherPeopleService {
 // 在 people/people.module.ts 中注册为 provider
 @Module({
   controllers: [PeopleController],
-  providers: [PeopleService]
+  providers: [PeopleService],
 })
 export default class PeopleModule {}
 ```
@@ -226,3 +226,144 @@ export default class PeopleController {
   constructor(@Optional() private readonly noneService: NoneService) {}
 }
 ```
+
+## 3 Modules
+
+Modules 用来组织应用的结构。任何一个 Nest 应用都至少包含一个模块 - **根模块**。**根模块**是 Nest 构建**应用图**的起点。功能相近的功能可以封装为一个模块
+
+<img src="./assets/Modules.png" alt="" />
+
+### 3.1 示例
+
+```ts
+// 新建 people/people.module.ts
+
+@Module({						// Module 类需要使用 @Module 来装饰
+  providers: [PeopleService],		// 对应前文的 Providers，将被 Nest 实例化
+  controllers: [PeopleController],	// 对应前文的 Controllers，将被 Nest 实例化
+  exports: [PeopleService],			// 本模块导出的 providers，将对导入本模块的其他模块可见
+  imports: [],			// 本模块导入的其他模块，这些模块导出的 providers，可以被引用
+})
+export default class PeopleModule {}
+
+// 在 app.module.ts 中
+@Module({
+  providers: [AppService],
+  controllers: [AppController],
+  exports: [],
+  imports: [PeopleModule],
+})
+export default class AppModule {}
+
+```
+
+### 3.2 特性
+
+- 模块默认是单例。所以在多个模块之间，可以共享任何 Provider 的同一实例
+
+- Module 类也可以进行依赖注入，但是它们本身不能作为依赖被注入：
+
+  ```ts
+  @Module({
+    controllers: [PeopleController],
+    providers: [PeopleService]
+  })
+  export default class PeopleModule {
+    constructor(private readonly peopleService: PeopleService) {}
+  }
+  ```
+
+  
+
+### 3.3 模块再导出
+
+- Module 除了导出自己内部的 Providers，还可以导出它导入的模块。如此，导入此模块的模块，也可以使用此模块导入的模块了，形如
+
+```ts
+// 假定有另外一个模块 CommonModule
+
+@Module({
+  imports: [CommonModule],
+  exports: [CommonModule]
+})
+export default class DirectModule {}
+
+// 导入 DirectModule 的模块，也可以使用 CommonModule
+```
+
+### 3.4 全局模块
+
+- 将模块通过 `@Global()` 装饰成全局模块，全局模块的 Providers 全局可见，其他模块无需再 import 此模块即可使用此模块的 Providers
+- 全局模块只能注册一次
+
+```ts
+@Global()
+@Module({
+  controllers: [CommonController],
+  providers: [CommonService],
+  exports: [CommonService],
+})
+export default class CommonModule {}
+```
+
+### 3.5 动态模块
+
+- 动态模块可以动态的注册、配置 Providers 等
+- 通过**模块类的静态方法**实现，静态方法返回一个动态模块。如下例中的 forRoot 方法
+- 静态方法的返回值和 @Module() 中的数据的关系不是覆盖，而是拓展
+
+```ts
+// 以下为一个实际例子
+
+@Module({
+  providers: [Connection],
+})
+export class DatabaseModule {
+  static forRoot(entities = [], options?): DynamicModule {
+    const providers = createDatabaseProviders(options, entities);
+
+    // 返回值支持同步和异步
+    return {
+      global: false,
+      module: DatabaseModule,
+      providers: providers,
+      exports: providers,
+    };
+  }
+}
+```
+
++ 动态模块的导入和导出，形如：
+
+```ts
+// 紧接上述例子
+
+@Module({
+  imports: [DatabaseModule.forRoot(User)],
+  exports: [DatabaseModule]		// 再导出可省略静态方法 forRoot
+})
+export default class AppModule {}
+```
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

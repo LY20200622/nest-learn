@@ -5,6 +5,7 @@
 </p>
 
 ## Overview
+
 Nest + Rx + Typescript
 
 ## Node Version
@@ -16,7 +17,7 @@ v16.20.0
 ## Installation
 
 ```bash
-$ npm install
+npm install
 ```
 
 ## Running the app
@@ -30,19 +31,6 @@ $ npm run start:dev
 
 # production mode
 $ npm run start:prod
-```
-
-## Test
-
-```bash
-# unit tests
-$ npm run test
-
-# e2e tests
-$ npm run test:e2e
-
-# test coverage
-$ npm run test:cov
 ```
 
 ## License
