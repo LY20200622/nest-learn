@@ -23,9 +23,13 @@ export default class LoggerInterceptor<T>
     // 调用 next.handle 方法，让 router handle 可以进行处理。其返回的流中，包含了 router handle 的返回值。
     return next.handle().pipe(
       // 进行订阅，从而进行 router handle 之后的处理
-      map((value) => ({
-        data: value,
-      })),
+      map((value) => {
+        console.log('Logger[LoggerInterceptor] - After');
+
+        return {
+          data: value,
+        };
+      }),
     );
   }
 }
