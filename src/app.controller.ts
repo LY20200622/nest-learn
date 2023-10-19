@@ -32,6 +32,7 @@ export class AppController {
   @Get('/req')
   getReq(@Req() req: Request) {
     console.log('Cur Req: ', req.query);
+    return 'req route';
   }
 
   @Get('/name')

@@ -38,7 +38,7 @@ export default class PeopleController {
 
 - 对于 `return 'All People'` 返回值。在 Nest 中，有两种方式处理 Response
 
-  1. 利用 Nest 内建机制。如果返回的是 array 或者 object，Nest 会将他们转换为 JSON，然后进行返回。如果是 JS 的原始类型的值，Nest 会直接返回值。
+  1. 利用 Nest 内建机制。我们只需要 return value，其他交给 nest。如果返回的是 array 或者 object，Nest 会将他们转换为 JSON，然后进行返回。如果是 JS 的原始类型的值，Nest 会直接返回值。
   2. 处理原生 Response。通过在 handle 中使用 `@Res` 或者 `@Next` 装饰器，可以获取原生 Response 对象，但设置状态码、返回等操作都需要自己完成。例如：`getAllPeople(@Res() res)`，其中，res 就是原生的 Response 对象。
 
   > 如果想两种方式一起使用，则需要使用形如：@Res({ passthrough: true })。一方面可以获取原生 Response，一方面可以将设置状态码等操作交给 Nest 使用
@@ -115,7 +115,7 @@ export default class PeopleController {
 ```ts
 // people.dto.ts
 
-// class（推荐）
+// class（推荐，会在编译后保留结构）
 export class PeopleDataDTO {
   name: string;
   age: number;
@@ -189,6 +189,7 @@ export default class PeopleController {
   // 这里省略了 @Inject(PeopleService)，因为 Nest 可以根据类型进行注入
   constructor(private readonly peopleService: PeopleService) {}
 
+  @Get('/getAll')
   getAllPeopleNamesByService(): Array<string> {
     return this.peopleService.getAllPeopleNames(); // 使用方法
   }
@@ -220,10 +221,10 @@ export default class PeopleModule {}
 使用 `@Optional`，形如：
 
 ```ts
-@Controller('people')
-export default class PeopleController {
-  // 表明 NoneService 该依赖是可选的，当未找到此依赖时，不会报错而是使用默认值
-  constructor(@Optional() private readonly noneService: NoneService) {}
+@Injectable()
+export class HttpService<T> {
+  // HttpService 的构造函数接受一个 httpClient 参数，该参数被标记为可选的（使用了 @Optional() 装饰器）并且使用了 @Inject('HTTP_OPTIONS') 装饰器来注入一个名为 HTTP_OPTIONS 的依赖项。这意味着我们可以在创建 HttpService 实例时向其传递一个 httpClient 参数，或者使用默认的 HTTP_OPTIONS 依赖项。
+  constructor(@Optional() @Inject('HTTP_OPTIONS') private httpClient: T) {}
 }
 ```
 
@@ -241,8 +242,8 @@ Modules 用来组织应用的结构。任何一个 Nest 应用都至少包含一
 @Module({						// Module 类需要使用 @Module 来装饰
   providers: [PeopleService],		// 对应前文的 Providers，将被 Nest 实例化
   controllers: [PeopleController],	// 对应前文的 Controllers，将被 Nest 实例化
-  exports: [PeopleService],			// 本模块导出的 providers，将对导入本模块的其他模块可见
-  imports: [],			// 本模块导入的其他模块，这些模块导出的 providers，可以被引用
+  exports: [PeopleService],			// 本模块导出的 Providers，将对导入本模块的其他模块可见
+  imports: [],			// 本模块导入的其他模块，这些模块导出的 Providers，可以被引用
 })
 export default class PeopleModule {}
 
@@ -259,7 +260,7 @@ export default class AppModule {}
 
 ### 3.2 特性
 
-- 模块默认是单例。所以在多个模块之间，可以共享任何 Provider 的同一实例
+- 模块默认是单例，所以它 `exports` 的任何 `Provider` 也为单例，所以在多个模块之间，通过 `import` 同一模块，可以共享 Provider 的同一实例
 
 - Module 类也可以进行依赖注入，但是它们本身不能作为依赖被注入：
 
@@ -314,6 +315,9 @@ export default class CommonModule {}
 
 ```ts
 // 以下为一个实际例子
+import { Module, DynamicModule } from '@nestjs/common';
+import { createDatabaseProviders } from './database.providers';
+import { Connection } from './connection.provider';
 
 @Module({
   providers: [Connection],
