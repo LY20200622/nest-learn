@@ -11,16 +11,25 @@ import { HttpExceptionFilter } from '../exception/diyHttpExceptionFilter';
 import AuthGuard from 'src/guard/auth.guard';
 import Role from 'src/decorator/role.decorator';
 import LoggerInterceptor from 'src/interceptor/logger.interceptor';
+import { People2Service } from './people2.service';
 
 @Controller('people')
 @UseGuards(AuthGuard)
 @UseInterceptors(LoggerInterceptor)
 export default class PeopleController {
-  constructor(private readonly peopleService: PeopleService) {}
+  constructor(
+    private readonly peopleService: PeopleService,
+    private readonly people2Service: People2Service,
+  ) {}
 
   @Get()
   getAllPeople(): string {
     return this.peopleService.getAllPeople();
+  }
+
+  @Get('/another')
+  getAllPeople2(): string {
+    return this.people2Service.getPeopleNamesFromPeopleService();
   }
 
   @Get('/error')

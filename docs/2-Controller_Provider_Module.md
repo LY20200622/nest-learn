@@ -4,7 +4,7 @@
 
 处理进入的 request，返回 response 到客户端。路由机制决定哪个路由由哪个 Controller 处理：
 
-<img src="./assets/Controllers.png" alt="" />
+<img src="./assets/Controllers.png" alt="" style="border: 1px solid black" />
 
 ### 1.1 示例
 
@@ -167,19 +167,20 @@ export default class PeopleModule {}
 
 ## 2 Providers
 
+- 定义上，例如：一个使用 `@Injectable` 装饰的 JS 类，将此类在 Module 文件中进行声明当作 Provider
 - 可以被当作依赖进行注入。例如：基于 `constructor` 注入，基于属性注入
 - 让对象之间可以建立各种联系，而连接实例之间的工作则可以交付给 Nest 完成
-- 定义上，例如：一个使用 `@Injectable` 装饰的 JS 类，将此类在 Module 文件中进行声明当作 Provider
 - 使用场景上，例如：Controller 可以将复杂的工作交付给 Provider 进行处理
 
-<img src="./assets/Providers.png" alt="" />
+<img src="./assets/Providers.png" alt="" style="border: 1px solid black" />
 
 ### 2.1 示例
 
 ```typescript
-// 新建 people/people.service.ts。PeopleService 将被声明为一个 Provider
+// 新建 /people/people.service.ts。PeopleService 将被声明为一个 Provider
 
-@Injectable() // @Injectable 让其可以被 Nest Ioc 容器进行处理。Ioc （控制反转）容器是一种用于实现依赖注入的软件组件
+// @Injectable 让其可以被 Nest Ioc 容器进行处理。Ioc （控制反转）容器是一种用于实现依赖注入的软件组件
+@Injectable()
 export default class PeopleService {
   private peopleNames: Array<string> = [];
 
@@ -221,14 +222,14 @@ export default class AnotherPeopleService {
 // 在 people/people.module.ts 中注册为 provider
 @Module({
   controllers: [PeopleController],
-  providers: [PeopleService],
+  providers: [PeopleService, AnotherPeopleService],
 })
 export default class PeopleModule {}
 ```
 
 ### 2.2 生命周期
 
-一般情况下，Provider 的生命周期和应用是同步的。当应用启动时，Provider 会被注册；当应用关闭时，Provider 会被销毁。特殊情况下，Provider 的生命周期可以设置成以 请求（request）为范围。
+一般情况下，Provider 的生命周期和应用是同步的。当应用启动时，Provider 会被注册，当应用关闭时，Provider 会被销毁。特殊情况下，Provider 的生命周期可以设置成以 请求（request）为范围
 
 ### 2.3 可选的 Provider
 
