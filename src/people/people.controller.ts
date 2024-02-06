@@ -20,9 +20,7 @@ export default class PeopleController {
 
   @Get()
   getAllPeople(): string {
-    const text = this.peopleService.getAllPeople();
-
-    return text;
+    return this.peopleService.getAllPeople();
   }
 
   @Get('/error')
