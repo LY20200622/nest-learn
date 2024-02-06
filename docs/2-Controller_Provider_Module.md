@@ -42,10 +42,10 @@ export default class PeopleController {
 
 - 对于 `return 'All People'` 返回值。在 Nest 中，有两种方式处理 Response：
 
-  1. 利用 Nest 内建机制。我们只需要 return value，其他交给 nest。如果返回的是 array 或者 object，Nest 会将他们转换为 JSON，然后进行返回。如果是 JS 的原始类型的值，Nest 会直接返回值。
-  2. 处理原生 Response。通过在 handle 中使用 `@Res` 或者 `@Next` 装饰器，可以获取原生 Response 对象，但设置状态码、返回等操作都需要自己完成。例如：`getAllPeople(@Res() res)`，其中，res 就是原生的 Response 对象。
+  1. 利用 Nest 内建机制。我们只需要 return value，其他交给 nest。如果返回的是 array 或者 object，Nest 会将他们转换为 JSON，然后进行返回。如果是 JS 的原始类型的值，Nest 会直接返回值
+  2. 处理原生 Response。通过在 handle 中使用 `@Res` 或者 `@Next` 装饰器，可以获取原生 Response 对象，但设置状态码、返回等操作都需要自己完成。例如：`getAllPeople(@Res() res)`，其中，res 就是原生的 Response 对象
 
-  > 如果想两种方式一起使用，则需要使用形如：@Res({ passthrough: true })。一方面可以获取原生 Response，一方面可以将设置状态码等操作交给 Nest 使用
+  > 如果想两种方式一起使用，则需要使用形如：`@Res({ passthrough: true })`。一方面可以获取原生 Response，一方面可以将设置状态码等操作交给 Nest 处理
 
 ### 1.2 常用装饰器
 
@@ -53,7 +53,7 @@ export default class PeopleController {
 
 - `@Res()、@Response()`。获取响应对象
 
-- `@Next()`。代表 next
+- `@Next()`。代表 next 方法
 
 - `@Session()`。代表 req.session
 
@@ -64,7 +64,8 @@ export default class PeopleController {
   ```typescript
   @Controller('people')
   export default class PeopleController {
-    @Get(':id') // 路由参数标记
+    // 路由参数标记
+    @Get(':id')
     findOne(@Param('id') id) {
       // 添加了路由参数标记的 handle 需要放在静态路径 handle 的后面
       return id;
@@ -86,22 +87,24 @@ export default class PeopleController {
 
 - `@HostParam()`。代表 req.hosts。可以配合 host 参数标记使用：
 
-  - 因为在 `@Controller` 中，可以传入一个包含 host 属性的对象，用来指定接收的请求的 host 必须满足某个值。而且这个 host 的值，可以使用参数标记，可以用 `@HostParam()` 来获取这个参数标记。形如：
+  - 在 `@Controller` 中，可以传入一个包含 host 属性的对象，用来指定接收的请求的 host 必须满足某个值。而且这个 host 的值，可以使用参数标记，可以用 `@HostParam()` 来获取这个参数标记。形如：
 
   ```typescript
-  @Controller({ host: ':name.example.com' }) // :name 就是参数标记
+  // :name 就是参数标记。此例中，host 必须满足 xxx.example.com 的形式
+  import { hostname } from 'node:os';
+  @Controller({ host: ':name.example.com' })
   export default class TestController {
     @Get()
     getHostName(@HostParam('name') hostName: string) {
       // 用 @HostParam 获取参数标记，赋值给 hostName
-      // ...
+      return hostname;
     }
   }
   ```
 
 - `@Get()、@Post()、@Put()、@Delete()、@Patch()、@Options()、@Head()、@All()`。分别对应各种的 HTTP 请求方法
 
-- `@HttpCode(statusCode: number)`。设置对应的响应状态码。默认情况下总是 200，除了 Post 方法是 201
+- `@HttpCode(statusCode: number)`。设置对应的响应状态码。默认情况下总是 200（Post 方法是 201）
 
 - `@Header(key: string, value: string)`。设置自定义的响应头
 
