@@ -2,41 +2,45 @@
 
 ## 1 Controller
 
-处理进入的 request，返回 response 到客户端。路由机制决定哪个路由由哪个 Controller 处理。
+处理进入的 request，返回 response 到客户端。路由机制决定哪个路由由哪个 Controller 处理：
 
-<img src="./assets/Controllers.png" alt="" >
+<img src="./assets/Controllers.png" alt="" />
 
 ### 1.1 示例
 
-```ts
+```typescript
 // 新建 people/people.controller.ts
 
 import { Controller, Get } from '@nestjs/common';
 
-@Controller('people') // 'people' 是可选参数，用来指定路由前缀
+// 'people' 是可选参数，用来指定路由前缀
+@Controller('people')
 export default class PeopleController {
-  @Get() // 装饰器的参数可选，此例中对应 '/people' 的路由，若传入 'chinese'，则对应 '/people/chinese'。可以一定的正则形式。
+  // 装饰器的参数可选，此例中对应 '/people' 的路由，若传入 'chinese'，则对应 '/people/chinese'。可以一定的正则形式。
+  @Get()
   getAllPeople(): string {
     return 'All People';
   }
 
-  @Get('promise') // 路由 handle 支持异步，Nest 会自己 resolve
+  // 路由 handle 支持异步，Nest 会自己 resolve
+  @Get('promise')
   async getAllPeoplePromise(): Promise<string> {
-    return 'All People';
+    return 'All People Promise';
   }
 
-  @Get('observable') // 路由 handle 支持流，Nest 会自己订阅
+  // 路由 handle 支持流，Nest 会自己订阅
+  @Get('observable')
   getAllPeopleObservable(): Observable<string> {
-    return of('All People');
+    return of('All People Observable');
   }
 }
 ```
 
 - 使用装饰器 @Controller 定义 PeopleController 类是 Controller
 
-- 使用装饰器 @Get 定义 getAllPeople 方法是一个路由 handle。这个 handle 对应了 get 方法 + '/people' 路由
+- 使用装饰器 @Get 定义 getAllPeople 方法是一个路由 handle。这个 handle 对应了 get 方法 + `'/people'('/people' + '')` 路由
 
-- 对于 `return 'All People'` 返回值。在 Nest 中，有两种方式处理 Response
+- 对于 `return 'All People'` 返回值。在 Nest 中，有两种方式处理 Response：
 
   1. 利用 Nest 内建机制。我们只需要 return value，其他交给 nest。如果返回的是 array 或者 object，Nest 会将他们转换为 JSON，然后进行返回。如果是 JS 的原始类型的值，Nest 会直接返回值。
   2. 处理原生 Response。通过在 handle 中使用 `@Res` 或者 `@Next` 装饰器，可以获取原生 Response 对象，但设置状态码、返回等操作都需要自己完成。例如：`getAllPeople(@Res() res)`，其中，res 就是原生的 Response 对象。
@@ -57,16 +61,20 @@ export default class PeopleController {
 
 - `@Param(key?: string)`。代表 req.params 或 req.params[key]。需要配合路由参数标记使用，形如：
 
-  ```ts
-  @Get(':id')  // 路由参数标记
-  findOne(@Param('id') id) {  // 添加了路由参数标记的 handle 需要放在静态路径 handle 的后面
-    return id;
-  }
+  ```typescript
+  @Controller('people')
+  export default class PeopleController {
+    @Get(':id') // 路由参数标记
+    findOne(@Param('id') id) {
+      // 添加了路由参数标记的 handle 需要放在静态路径 handle 的后面
+      return id;
+    }
 
-  // 或者
-  @Get(':id')
-  findOne(@Param() params) {
-    return params.id;
+    // 或者
+    @Get(':id')
+    findOne(@Param() params) {
+      return params.id;
+    }
   }
   ```
 
@@ -80,7 +88,7 @@ export default class PeopleController {
 
   - 因为在 `@Controller` 中，可以传入一个包含 host 属性的对象，用来指定接收的请求的 host 必须满足某个值。而且这个 host 的值，可以使用参数标记，可以用 `@HostParam()` 来获取这个参数标记。形如：
 
-  ```ts
+  ```typescript
   @Controller({ host: ':name.example.com' }) // :name 就是参数标记
   export default class TestController {
     @Get()
@@ -99,10 +107,10 @@ export default class PeopleController {
 
 - `@Redirect(url: string, statusCode: number)`。设置重定向，后者的默认值是 302。可以被如下形式的 handle 的返回值覆盖：
 
-  ```ts
+  ```typescript
   {
-    "url": string,
-    "statusCode": number
+    url: string;
+    statusCode: number;
   }
   ```
 
@@ -112,7 +120,7 @@ export default class PeopleController {
 
 可以通过 `interface` 或者 `class` 定义 DTO：
 
-```ts
+```typescript
 // people.dto.ts
 
 // class（推荐，会在编译后保留结构）
@@ -132,9 +140,12 @@ export interface IPeopleDataDTO {
 // ==================================================
 
 // people.controller.ts
-@Post()
-postSomeData(@Body() body: IPeopleDataDTO) {
-  // ...
+@Controller('people')
+export default class PeopleController {
+  @Post()
+  postSomeData(@Body() body: IPeopleDataDTO) {
+    // ...
+  }
 }
 ```
 
@@ -142,13 +153,13 @@ postSomeData(@Body() body: IPeopleDataDTO) {
 
 - Controller 总是属于 Module 的，在 Module 中进行 Controller 注册：
 
-```ts
+```typescript
 // people.module.ts
 
 @Module({
-  controllers: [PeopleController]
+  controllers: [PeopleController],
 })
-export default PeopleModule {}
+export default class PeopleModule {}
 ```
 
 ## 2 Providers
@@ -158,11 +169,11 @@ export default PeopleModule {}
 - 定义上，例如：一个使用 `@Injectable` 装饰的 JS 类，将此类在 Module 文件中进行声明当作 Provider
 - 使用场景上，例如：Controller 可以将复杂的工作交付给 Provider 进行处理
 
-<img src="./assets/Providers.png" alt="" >
+<img src="./assets/Providers.png" alt="" />
 
 ### 2.1 示例
 
-```ts
+```typescript
 // 新建 people/people.service.ts。PeopleService 将被声明为一个 Provider
 
 @Injectable() // @Injectable 让其可以被 Nest Ioc 容器进行处理。Ioc （控制反转）容器是一种用于实现依赖注入的软件组件
@@ -220,7 +231,7 @@ export default class PeopleModule {}
 
 使用 `@Optional`，形如：
 
-```ts
+```typescript
 @Injectable()
 export class HttpService<T> {
   // HttpService 的构造函数接受一个 httpClient 参数，该参数被标记为可选的（使用了 @Optional() 装饰器）并且使用了 @Inject('HTTP_OPTIONS') 装饰器来注入一个名为 HTTP_OPTIONS 的依赖项。这意味着我们可以在创建 HttpService 实例时向其传递一个 httpClient 参数，或者使用默认的 HTTP_OPTIONS 依赖项。
@@ -236,14 +247,15 @@ Modules 用来组织应用的结构。任何一个 Nest 应用都至少包含一
 
 ### 3.1 示例
 
-```ts
+```typescript
 // 新建 people/people.module.ts
 
-@Module({						// Module 类需要使用 @Module 来装饰
-  providers: [PeopleService],		// 对应前文的 Providers，将被 Nest 实例化
-  controllers: [PeopleController],	// 对应前文的 Controllers，将被 Nest 实例化
-  exports: [PeopleService],			// 本模块导出的 Providers，将对导入本模块的其他模块可见
-  imports: [],			// 本模块导入的其他模块，这些模块导出的 Providers，可以被引用
+@Module({
+  // Module 类需要使用 @Module 来装饰
+  providers: [PeopleService], // 对应前文的 Providers，将被 Nest 实例化
+  controllers: [PeopleController], // 对应前文的 Controllers，将被 Nest 实例化
+  exports: [PeopleService], // 本模块导出的 Providers，将对导入本模块的其他模块可见
+  imports: [], // 本模块导入的其他模块，这些模块导出的 Providers，可以被引用
 })
 export default class PeopleModule {}
 
@@ -255,7 +267,6 @@ export default class PeopleModule {}
   imports: [PeopleModule],
 })
 export default class AppModule {}
-
 ```
 
 ### 3.2 特性
@@ -264,28 +275,26 @@ export default class AppModule {}
 
 - Module 类也可以进行依赖注入，但是它们本身不能作为依赖被注入：
 
-  ```ts
+  ```typescript
   @Module({
     controllers: [PeopleController],
-    providers: [PeopleService]
+    providers: [PeopleService],
   })
   export default class PeopleModule {
     constructor(private readonly peopleService: PeopleService) {}
   }
   ```
 
-  
-
 ### 3.3 模块再导出
 
 - Module 除了导出自己内部的 Providers，还可以导出它导入的模块。如此，导入此模块的模块，也可以使用此模块导入的模块了，形如
 
-```ts
+```typescript
 // 假定有另外一个模块 CommonModule
 
 @Module({
   imports: [CommonModule],
-  exports: [CommonModule]
+  exports: [CommonModule],
 })
 export default class DirectModule {}
 
@@ -297,7 +306,7 @@ export default class DirectModule {}
 - 将模块通过 `@Global()` 装饰成全局模块，全局模块的 Providers 全局可见，其他模块无需再 import 此模块即可使用此模块的 Providers
 - 全局模块只能注册一次
 
-```ts
+```typescript
 @Global()
 @Module({
   controllers: [CommonController],
@@ -313,7 +322,7 @@ export default class CommonModule {}
 - 通过**模块类的静态方法**实现，静态方法返回一个动态模块。如下例中的 forRoot 方法
 - 静态方法的返回值和 @Module() 中的数据的关系不是覆盖，而是拓展
 
-```ts
+```typescript
 // 以下为一个实际例子
 import { Module, DynamicModule } from '@nestjs/common';
 import { createDatabaseProviders } from './database.providers';
@@ -337,37 +346,14 @@ export class DatabaseModule {
 }
 ```
 
-+ 动态模块的导入和导出，形如：
+- 动态模块的导入和导出，形如：
 
-```ts
+```typescript
 // 紧接上述例子
 
 @Module({
   imports: [DatabaseModule.forRoot(User)],
-  exports: [DatabaseModule]		// 再导出可省略静态方法 forRoot
+  exports: [DatabaseModule], // 再导出可省略静态方法 forRoot
 })
 export default class AppModule {}
 ```
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
