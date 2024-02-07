@@ -10,7 +10,7 @@ import { AppModule } from './app.module';
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);
 
-  // 使用全局中间件
+  // 使用全局 Middleware
   // app.use(NothingMiddleware);
 
   // 使用扩展的全局异常处理器
