@@ -1,6 +1,6 @@
-# 4 ExceptionFilters
+# ExceptionFilters
 
-Nest 内置一个**异常层**，负责处理应用程序中未被捕获的异常，即未被业务代码捕获的异常，都将由其捕获。这种机制由内建的 `Global Exception Filter` 完成，它处理类型为 `HttpException` 的异常，当异常不是此种类型时，其无法识别并抛出如下错误：
+Nest 内置一个**异常层**，负责处理应用程序中未被捕获的异常。即未被业务代码捕获的异常，都将由其捕获。这种机制由内建的 `Global Exception Filter` 完成，它处理类型为 `HttpException` 的异常，当异常不是此种类型时，其无法识别并抛出如下错误：
 
 ```json
 {
@@ -15,12 +15,23 @@ Nest 内置一个**异常层**，负责处理应用程序中未被捕获的异�
 
 - Nest 提供了一个内建的标准异常类 `HttpException`，使用如下：
 
-```ts
+```typescript
 // people.controller.ts
 
-@Get('error')
-throwAError() {
-  throw new HttpException('Forbidden', HttpStatus.FORBIDDEN);
+import { Controller } from '@nestjs/common';
+
+@Controller('people')
+export default class PeopleController {
+  @Get('error')
+  throwAError() {
+    try {
+      // do something error
+    } catch (error) {
+      throw new HttpException('Forbidden', HttpStatus.FORBIDDEN, {
+        cause: error,
+      });
+    }
+  }
 }
 ```
 
@@ -33,13 +44,41 @@ throwAError() {
 }
 ```
 
-- `new HttpException(response, status, options)` 接收两个必填参数和一个可选参数
+- `new HttpException(response, status, options)` 接收两个必填参数和一个可选参数：
 
-1. response 定义 JSON 响应体，可以为一个字符串，也可为一个对象。若为对象，其结构为：
-   1. statusCode。默认为 status 的值
-   2. message。对错误的描述
-2. status 定义 HTTP 状态码
-3. options 中可以定义 case，case 不会序列化后展示给用户，但可用于将内部错误记录于日志。
+  1. response 定义 JSON 响应体，可以为一个字符串，也可为一个对象。默认情况下，JSON 响应体的结构为：
+
+     ```typescript
+     {
+       statusCode: HttpStatus; // 默认为 status 的值
+       message: string; // 对错误的描述
+     }
+     ```
+
+     但可通过传入任意结构的对象进行复写，例如：
+
+     ```typescript
+     // 传入
+     throw new HttpException(
+       {
+         status: HttpStatus.FORBIDDEN,
+         error: 'This is a custom message',
+       },
+       HttpStatus.FORBIDDEN,
+     );
+     ```
+
+     对应返回：
+
+     ```json
+     {
+       "status": 403,
+       "error": "This is a custom message"
+     }
+     ```
+
+  2. status 定义 HTTP 状态码
+  3. options 中可以定义 case，case 不会序列化后展示给用户，但可用于将内部错误记录于日志
 
 ## 1.2 自定义异常
 
@@ -48,6 +87,8 @@ throwAError() {
 ```ts
 // 新增 fastForbidden.exception.ts
 
+import { Controller } from '@nestjs/common';
+
 export default class FastForbiddenException extends HttpException {
   constructor() {
     super('Forbidden', HttpStatus.FORBIDDEN);
@@ -55,9 +96,12 @@ export default class FastForbiddenException extends HttpException {
 }
 
 // people.controller.ts
-@Get('diyError')
-throwADiyError() {
-  throw new FastForbiddenException();
+@Controller('people')
+export default class PeopleController {
+  @Get('diyError')
+  throwADiyError() {
+    throw new FastForbiddenException();
+  }
 }
 ```
 
@@ -94,12 +138,16 @@ throwADiyError() {
 
    ```ts
    // people/people.controller.ts
+   import { Controller } from '@nestjs/common';
 
-   // 这里会将抛出的异常先交付给 HttpExceptionFilter 处理，并可以自定义响应内容给客户端
-   @Get('diyError')
-   @UseFilter(HttpExceptionFilter)
-   throwADiyError() {
-     throw new FastForbiddenException();
+   @Controller()
+   export default class PeopleController {
+     // 这里会将抛出的异常先交付给 HttpExceptionFilter 处理，并可以自定义响应内容给客户端
+     @Get('diyError')
+     @UseFilter(HttpExceptionFilter)
+     throwADiyError() {
+       throw new FastForbiddenException();
+     }
    }
    ```
 
