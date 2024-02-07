@@ -13,12 +13,12 @@ async function bootstrap() {
   // 使用全局 Middleware
   // app.use(NothingMiddleware);
 
+  // 使用全局自定义异常处理器
+  // app.useGlobalFilters(new HttpExceptionFilter());
+
   // 使用扩展的全局异常处理器
   // const { httpAdapter } = app.get(HttpAdapterHost);
   // app.useGlobalFilters(new AllExceptionFilter(httpAdapter));
-
-  // 使用全局自定义异常处理器
-  // app.useGlobalFilters(new HttpExceptionFilter());
 
   // 使用全局验证 Pipe
   // app.useGlobalPipes(new ClassCheckPipe());
