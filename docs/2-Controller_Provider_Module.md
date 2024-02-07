@@ -233,12 +233,13 @@ export default class PeopleModule {}
 
 ### 2.3 可选的 Provider
 
-使用 `@Optional`，形如：
+使用 `@Optional` 装饰器，形如：
 
 ```typescript
 @Injectable()
 export class HttpService<T> {
-  // HttpService 的构造函数接受一个 httpClient 参数，该参数被标记为可选的（使用了 @Optional() 装饰器）并且使用了 @Inject('HTTP_OPTIONS') 装饰器来注入一个名为 HTTP_OPTIONS 的依赖项。这意味着我们可以在创建 HttpService 实例时向其传递一个 httpClient 参数，或者使用默认的 HTTP_OPTIONS 依赖项。
+  // 构造函数接受了一个 httpClient 参数，该参数被标记为可选的（使用了 @Optional() 装饰器）并且使用了 @Inject('HTTP_OPTIONS') 装饰器来注入一个名为 HTTP_OPTIONS 的依赖项
+  // 如果该 Provider 被正常注入，则 httpClient 的值对应 Provider 的实例。否则为 undefined
   constructor(@Optional() @Inject('HTTP_OPTIONS') private httpClient: T) {}
 }
 ```
@@ -280,6 +281,7 @@ export default class AppModule {}
 - Module 类也可以进行依赖注入，但是它们本身不能作为依赖被注入：
 
   ```typescript
+  // people/people.module.ts
   @Module({
     controllers: [PeopleController],
     providers: [PeopleService],
@@ -311,6 +313,8 @@ export default class DirectModule {}
 - 全局模块只能注册一次
 
 ```typescript
+// common.module.ts
+
 @Global()
 @Module({
   controllers: [CommonController],
@@ -327,7 +331,8 @@ export default class CommonModule {}
 - 静态方法的返回值和 @Module() 中的数据的关系不是覆盖，而是拓展
 
 ```typescript
-// 以下为一个实际例子
+// database.module.ts
+
 import { Module, DynamicModule } from '@nestjs/common';
 import { createDatabaseProviders } from './database.providers';
 import { Connection } from './connection.provider';
@@ -354,6 +359,7 @@ export class DatabaseModule {
 
 ```typescript
 // 紧接上述例子
+// app.module.ts
 
 @Module({
   imports: [DatabaseModule.forRoot(User)],
