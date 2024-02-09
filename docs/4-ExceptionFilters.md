@@ -184,14 +184,14 @@ export default class PeopleController {
 
 ## 1.4 半自定义异常过滤器
 
-即继承内建的 BaseExceptionFilter，来实现部分的自定义，形如：
+即继承内建的 global exception filter（BaseExceptionFilter 类），来实现部分的自定义。继承 BaseExceptionFilter，并实现 catch 方法，形如：
 
-```ts
+```typescript
 @Catch()
 export default class AllExceptionFilter extends BaseExceptionFilter {
   catch(exception: unknown, host: ArgumentsHost) {
-    // do something
     super.catch(exception, host);
+    // do something
   }
 }
 ```
