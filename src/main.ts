@@ -8,28 +8,28 @@ import { AppModule } from './app.module';
 // import AllExceptionFilter from './exception/allExceptionFilter';
 
 async function bootstrap() {
-  const app = await NestFactory.create(AppModule);
+    const app = await NestFactory.create(AppModule);
 
-  // 使用全局 Middleware
-  // app.use(NothingMiddleware);
+    // 使用全局 Middleware
+    // app.use(NothingMiddleware);
 
-  // 使用全局自定义异常处理器
-  // app.useGlobalFilters(new HttpExceptionFilter());
+    // 使用全局自定义异常处理器
+    // app.useGlobalFilters(new HttpExceptionFilter());
 
-  // 使用扩展的全局异常处理器
-  // const { httpAdapter } = app.get(HttpAdapterHost);
-  // app.useGlobalFilters(new AllExceptionFilter(httpAdapter));
+    // 使用扩展的全局异常处理器
+    // const { httpAdapter } = app.get(HttpAdapterHost);
+    // app.useGlobalFilters(new AllExceptionFilter(httpAdapter));
 
-  // 使用全局验证 Pipe
-  // app.useGlobalPipes(new ClassCheckPipe());
+    // 使用全局验证 Pipe
+    // app.useGlobalPipes(new ClassCheckPipe());
 
-  // 使用全局 Guard
-  // app.useGlobalGuards(new AuthGuard());
+    // 使用全局 Guard
+    // app.useGlobalGuards(new AuthGuard());
 
-  // 使用全局 Interceptor
-  // app.useGlobalInterceptors(new LoggerInterceptor());
+    // 使用全局 Interceptor
+    // app.useGlobalInterceptors(new LoggerInterceptor());
 
-  await app.listen(3000);
+    await app.listen(3000);
 }
 
 bootstrap();

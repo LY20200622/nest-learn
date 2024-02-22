@@ -11,7 +11,7 @@ import { HttpExceptionFilter } from '../exception/diyHttpExceptionFilter';
 import AuthGuard from 'src/guard/auth.guard';
 import Role from 'src/decorator/role.decorator';
 import LoggerInterceptor from 'src/interceptor/logger.interceptor';
-import { People2Service } from './people2.service';
+import { PeoplesService } from './peoples.service';
 
 @Controller('people')
 @UseGuards(AuthGuard)
@@ -19,7 +19,7 @@ import { People2Service } from './people2.service';
 export default class PeopleController {
     constructor(
         private readonly peopleService: PeopleService,
-        private readonly people2Service: People2Service,
+        private readonly peoplesService: PeoplesService,
     ) {}
 
     @Get()
@@ -29,7 +29,7 @@ export default class PeopleController {
 
     @Get('/another')
     getAllPeople2(): string {
-        return this.people2Service.getPeopleNamesFromPeopleService();
+        return this.peoplesService.getPeopleNamesFromPeopleService();
     }
 
     @Get('/error')
