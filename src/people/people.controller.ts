@@ -1,6 +1,7 @@
 import {
     Controller,
     Get,
+    Param,
     SetMetadata,
     UseFilters,
     UseGuards,
@@ -12,6 +13,7 @@ import AuthGuard from 'src/guard/auth.guard';
 import Role from 'src/decorator/role.decorator';
 import LoggerInterceptor from 'src/interceptor/logger.interceptor';
 import { PeoplesService } from './peoples.service';
+import NothingPipe from '../pipe/nothing.pipe';
 
 @Controller('people')
 @UseGuards(AuthGuard)
@@ -50,5 +52,10 @@ export default class PeopleController {
     @Role('admin')
     getAdminData_2() {
         this.peopleService.getAdminData();
+    }
+
+    @Get(':uid')
+    getOneByUid(@Param('uid', NothingPipe) uid: string) {
+      return uid;
     }
 }
