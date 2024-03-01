@@ -5,7 +5,7 @@
 1. 被 `@Injectable()` 装饰器修饰
 2. 实现 `PipeTransform` 接口
 
-<img src="./assets/Pipe.png" alt="" />
+<img src="assets/Pipes.png" alt="" />
 
 ### 1.1 内建 Pipes
 
@@ -222,6 +222,18 @@ export class AppModule {}
 
 ## 2 Guards
 
-```
+1. 被 `@Injectable()` 装饰器装饰
+2. 实现 `CanActivate` 接口
+3. 决定 `request` 是否会被 `Route Handle` 处理
+4. 与中间件相比，主要优势在于可以知道 **执行上下文**
+5. 执行顺序方面：Middleware --> Guard --> Pipe --> Interceptor
 
-```
+<img src="assets/Guards.png" alt="" />
+
+### 2.1 使用 Guards
+
+-   以身份验证器为例。TODO Liam
+
+    ```typescript
+
+    ```
