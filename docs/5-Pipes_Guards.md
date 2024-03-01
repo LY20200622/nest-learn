@@ -30,14 +30,17 @@ import { Controller, Get, Param, ParseIntPipe } from '@nestjs/common';
 
 @Controller('people')
 export default class PeopleController {
-   constructor(private readonly someService: SomeService) {}
+    constructor(private readonly someService: SomeService) {}
 
-   @Get(':id')
-   async findOneById(@Param('id', ParseIntPipe) id: number) {
-      // 1. ParseIntPipe 会保证要么 id 为数值。要么类型转化失败，抛出异常
-      // 2. 此处使用了依赖注入。也可以手动传入实例化对象，形如：@Param('id', new ParseIntPipe({ errorHttpStatusCode: HttpStatus.NOT_ACCEPTABLE }))
-      return this.someService.find(id);
-   }
+    @Get(':id')
+    async findOneById(
+        @Param('id', new DefaultValuePipe(0), ParseIntPipe) id: number,
+    ) {
+        // 1. ParseIntPipe 会保证要么 id 为数值。要么类型转化失败，抛出异常
+        // 2. 此处使用了依赖注入。也可以手动传入实例化对象，形如：@Param('id', new ParseIntPipe({ errorHttpStatusCode: HttpStatus.NOT_ACCEPTABLE }))
+        // 3. DefaultValuePipe 会保证在 id 缺失的情况下，给 ParseIntPipe 传入默认值 0
+        return this.someService.find(id);
+    }
 }
 ```
 
@@ -124,6 +127,98 @@ export default class PeopleController {
     ```
 
 3. 进阶例子：基于装饰器的校验
+
+    ```typescript
+    // some.dto.ts
+    import { IsString, IsInt } from 'class-validator';
+
+    export default class SomeDto {
+        @IsString()
+        name: string;
+
+        @IsInt()
+        age: number;
+    }
+
+    // SomeValidation.Pipe.ts
+    // 其实不用自己实现 SomeValidationPipe，因为 Nest 提供了内置的 ValidationPipe
+    import {
+        Injectable,
+        PipeTransform,
+        ArgumentMetadata,
+        BadRequestException,
+    } from '@nestjs/common';
+    import { validate } from 'class-validator';
+    import { plainToInstance } from 'class-transformer';
+
+    @Injectable()
+    export default class SomeValidationPipe implements PipeTransform<T, R> {
+        async transform(value: T, metaData: ArgumentMetadata): R {
+            const { metatype } = metadata;
+
+            if (!metatype || !this.toValidate(metatype)) {
+                return value;
+            }
+
+            // 将传入的无类型对象使用装饰器（metatype）进行类型装饰
+            const object = plainToInstance(metatype, value);
+            // 进行类型验证
+            const errors = await validate(object);
+
+            if (errors.length > 0) {
+                throw new BadRequestException('Validation failed');
+            }
+
+            return value;
+        }
+
+        private toValidate(metatype: Function): boolean {
+            const types: Function[] = [String, Boolean, Number, Array, Object];
+            return !types.includes(metatype);
+        }
+    }
+
+    // people.controller.ts
+    import { Controller, Body, Post } from '@nestjs/common';
+
+    @Controller('people')
+    export default class PeopleController {
+        @Post()
+        test2(@Body(new SomeValidationPipe()) body: SomeDto) {
+            // do something
+        }
+    }
+    ```
+
+### 1.4 全局 Pipes
+
+```typescript
+// 方案一：不能使用依赖注入的方式，因为在所有模块之外
+// main.ts
+async function bootstrap() {
+    const app = await NestFactory.create(AppModule);
+
+    app.useGlobalPipes(new ValidationPipe());
+    await app.listen(3000);
+}
+
+bootstrap();
+
+// 方案二：变通使用依赖注入
+// xxxxx.module.ts（任意模块文件中）
+import { Module } from '@nestjs/common';
+import { APP_PIPE } from '@nestjs/core';
+
+@Module({
+    providers: [
+        {
+            provide: APP_PIPE,
+            useClass: ValidationPipe,
+        },
+    ],
+})
+export class AppModule {}
+```
 
 ## 2 Guards
 
