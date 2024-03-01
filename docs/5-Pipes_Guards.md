@@ -30,14 +30,14 @@ import { Controller, Get, Param, ParseIntPipe } from '@nestjs/common';
 
 @Controller('people')
 export default class PeopleController {
-    constructor(private readonly someService: SomeService) {}
+   constructor(private readonly someService: SomeService) {}
 
-    @Get(':id')
-    async findOneById(@Param('id', ParseIntPipe) id: number) {
-        // 1. ParseIntPipe 会保证要么 id 为数值。要么类型转化失败，抛出异常
-        // 2. 此处使用了依赖注入。也可以手动传入实例化对象，形如：@Param('id', new ParseIntPipe({ errorHttpStatusCode: HttpStatus.NOT_ACCEPTABLE }))
-        return this.someService.find(id);
-    }
+   @Get(':id')
+   async findOneById(@Param('id', ParseIntPipe) id: number) {
+      // 1. ParseIntPipe 会保证要么 id 为数值。要么类型转化失败，抛出异常
+      // 2. 此处使用了依赖注入。也可以手动传入实例化对象，形如：@Param('id', new ParseIntPipe({ errorHttpStatusCode: HttpStatus.NOT_ACCEPTABLE }))
+      return this.someService.find(id);
+   }
 }
 ```
 
