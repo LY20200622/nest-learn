@@ -235,5 +235,18 @@ export class AppModule {}
 -   以身份验证器为例。TODO Liam
 
     ```typescript
+    // myAuth.guard.ts
+    import { CanActivate, ExecutionContext, Injectable } from '@nestjs/common';
 
+    @Injectable()
+    export default class MyAuthGuard implements CanActivate {
+        // 实现 CanActivate 接口的 canActivate 方法
+        // context 为执行上下文
+        canActivate(
+            context: ExecutionContext,
+        ): boolean | Promise<boolean> | Observable<boolean> {
+            const request = context.switchToHttp().getRequest();
+            // do something with request
+        }
+    }
     ```
