@@ -232,11 +232,16 @@ export class AppModule {}
 
 ### 2.1 使用 Guards
 
--   以身份验证器为例。TODO Liam
+-   以身份验证器为例
 
     ```typescript
     // myAuth.guard.ts
-    import { CanActivate, ExecutionContext, Injectable } from '@nestjs/common';
+    import {
+        CanActivate,
+        ExecutionContext,
+        Get,
+        Injectable,
+    } from '@nestjs/common';
 
     @Injectable()
     export default class MyAuthGuard implements CanActivate {
@@ -249,4 +254,39 @@ export class AppModule {}
             // do something with request
         }
     }
+
+    // people.controller.ts
+    import { Controller, UseGuards } from '@nestjs/common';
+    @Controller('people')
+    @UseGuards(MyAuthGuard)
+    export default class PeopleController {
+        // ...
+    }
+    ```
+
+### 2.2 全局 Guards
+
+-   形如
+
+    ```typescript
+    // main.ts
+    const app = await NestFactory.create(AppModule);
+
+    app.useGlobalGuards(new RolesGuard());
+
+    // 或者
+
+    // 任意 xxxx.module.ts 中
+    import { Module } from '@nestjs/common';
+    import { APP_GUARD } from '@nestjs/core';
+
+    @Module({
+        providers: [
+            {
+                provide: APP_GUARD,
+                useClass: RolesGuard,
+            },
+        ],
+    })
+    export class AppModule {}
     ```
