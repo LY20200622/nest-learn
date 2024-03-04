@@ -290,3 +290,66 @@ export class AppModule {}
     })
     export class AppModule {}
     ```
+
+### 2.3 实际例子
+
+-   `Nest` 允许绑定 **自定义元数据** 到 `Route Handle`。有两种方法：
+
+    1. 通过使用 `Reflector#createDecorator` 静态方法创建的 **自定义装饰器**，形如：
+
+        ```typescript
+        // role.decorator.ts
+        import { Reflector } from '@nestjs/core';
+
+        export const Roles = Reflector.createDecorator<string[]>();
+
+        // people.controller.ts
+        import { Controller, Get } from '@nestjs/common';
+
+        @Controller('people')
+        export default class PeopleController {
+            @Get()
+            @Roles(['admin'])
+            test() {
+                // do something
+            }
+        }
+        ```
+
+    2. 通过 `@SetMetadata()` 装饰器
+
+-   使用 `Reflector` 帮助类来获取 **自定义元数据**：
+
+    ```typescript
+    // myAuth.guard.ts
+    import {
+        CanActivate,
+        ExecutionContext,
+        Get,
+        Injectable,
+    } from '@nestjs/common';
+    import { Reflector } from '@nestjs/core';
+
+    @Injectable()
+    export default class MyAuthGuard implements CanActivate {
+        constructor(private reflector: Reflector) {}
+
+        canActivate(
+            context: ExecutionContext,
+        ): boolean | Promise<boolean> | Observable<boolean> {
+            // roles 为自定义元数据
+            const roles = this.reflector.get(Roles, context.getHandler());
+
+            if (!roles) {
+                return true;
+            }
+
+            // 获取请求中的数据
+            const request = context.switchToHttp().getRequest();
+            const user = request.user;
+
+            // 把元数据和请求中的数据进行对比
+            return matchRoles(roles, user.roles);
+        }
+    }
+    ```
